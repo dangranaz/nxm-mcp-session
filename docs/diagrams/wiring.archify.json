@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Config wiring — environment to injected structs",
+    "subtitle": "The binary resolves config + env once, then injects already-resolved values into the config-agnostic core.",
+    "output": "wiring.html",
+    "quality_profile": "showcase",
+    "locale": "en"
+  },
+  "stages": [
+    { "label": "Sources" },
+    { "label": "Resolve" },
+    { "label": "Structs" },
+    { "label": "Core" }
+  ],
+  "nodes": [
+    { "id": "toml", "type": "database", "label": "nxm-session.toml", "sublabel": "[session] block", "stage": 0, "row": 0, "tag": "nxm-config" },
+    { "id": "env", "type": "cloud", "label": "process env", "sublabel": "HOME · PWD · cwd", "stage": 0, "row": 2, "tag": "+ AGENT_SESSION_ID" },
+    { "id": "build", "type": "backend", "label": "build_wiring", "sublabel": "pure resolver", "stage": 1, "row": 1, "tag": "wiring.rs" },
+    { "id": "paths", "type": "backend", "label": "SessionPaths", "sublabel": "resolved dirs", "stage": 2, "row": 0 },
+    { "id": "ctx", "type": "backend", "label": "SessionContext", "sublabel": "no_elicit · workspace", "stage": 2, "row": 1 },
+    { "id": "resolveenv", "type": "backend", "label": "ResolveEnv", "sublabel": "home · session id", "stage": 2, "row": 2 },
+    { "id": "core", "type": "backend", "label": "nxm-session-core", "sublabel": "receives final values", "stage": 3, "row": 1, "tag": "no std::env" }
+  ],
+  "flows": [
+    { "id": "toml-build", "from": "toml", "to": "build", "label": "sessions_dir / no_elicit", "variant": "emphasis" },
+    { "id": "env-build", "from": "env", "to": "build", "label": "home / workspace" },
+    { "id": "build-paths", "from": "build", "to": "paths", "label": "absolute dirs", "variant": "emphasis" },
+    { "id": "build-ctx", "from": "build", "to": "ctx", "label": "runtime flags" },
+    { "id": "build-env", "from": "build", "to": "resolveenv", "label": "reader seam" },
+    { "id": "paths-core", "from": "paths", "to": "core", "label": "inject", "variant": "emphasis" },
+    { "id": "ctx-core", "from": "ctx", "to": "core", "label": "inject" },
+    { "id": "env-core", "from": "resolveenv", "to": "core", "label": "inject" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "One resolution point", "items": ["build_wiring is a pure function of its inputs", "the binary reads nxm-config + env and applies the defaults", "no config/env logic lives in the core"] },
+    { "dot": "emerald", "title": "Three injected ports", "items": ["SessionPaths: sessions_dir, archive_root, repo_root, global dirs", "SessionContext: no_elicit, workspace", "ResolveEnv: home, agent session id (archive reader seam)"] },
+    { "dot": "amber", "title": "Agnostic core", "items": ["zero std::env in src/ (mechanical gate)", "core receives final, absolute values", "the same library backs the future -ee edition"] }
+  ]
+}

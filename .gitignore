@@ -1,0 +1,17 @@
+/target
+
+# Working artifacts kept in clear on disk but NOT versioned.
+# sessions/: per-repo session handoffs (local working state).
+# prompts/:  delegation briefs for external agents (transient per feature).
+# archive/:  raw session archives (transient per feature).
+# .pi/:      external coding-agent review reports/plans (transient tooling output).
+# docs/ is intentionally NOT ignored: design docs stay versioned on this private
+# repo and are later moved to nxm-docs by dedicated scripts (see RULES.md).
+# Rete di sicurezza: nessun file di sessione/registry deve mai stare in root.
+/registry.json
+/registry.jsonl
+/ses_*.md
+/sessions/
+/prompts/
+/archive/
+/.pi/

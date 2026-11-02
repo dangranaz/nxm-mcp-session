@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "nxm-mcp-session — thin binary over a shared core",
+    "subtitle": "The binary owns config/env + logging; all session logic lives in nxm-session-core",
+    "output": "architecture.html",
+    "quality_profile": "showcase",
+    "locale": "en"
+  },
+  "components": [
+    { "id": "client", "type": "external", "label": "MCP Client", "sublabel": "Kiro / Pi / Codex", "pos": [40, 150], "size": [140, 64] },
+    { "id": "binary", "type": "backend", "label": "nxm-mcp-session", "sublabel": "main.rs — stdio loop", "pos": [260, 150], "size": [150, 64], "tag": "v0.5.0" },
+    { "id": "wiring", "type": "backend", "label": "wiring.rs", "sublabel": "config + env → structs", "pos": [260, 300], "size": [150, 60] },
+    { "id": "config", "type": "cloud", "label": "nxm-config", "sublabel": "~/.config/nxm/*.toml", "pos": [120, 430], "size": [150, 60], "tag": "tag v0.1.0" },
+    { "id": "shared", "type": "cloud", "label": "nxm-shared", "sublabel": "logging / tracing", "pos": [320, 430], "size": [150, 60], "tag": "rev 2e18023" },
+    { "id": "core", "type": "backend", "label": "nxm-session-core", "sublabel": "all session logic", "pos": [520, 150], "size": [160, 70], "tag": "tag v0.1.0" },
+    { "id": "handler", "type": "backend", "label": "handler", "sublabel": "dispatch · 14 tools", "pos": [760, 110], "size": [150, 60] },
+    { "id": "handoff", "type": "backend", "label": "handoff", "sublabel": "Sampling / Elicitation", "pos": [760, 200], "size": [150, 60] },
+    { "id": "registry", "type": "backend", "label": "registry + lifecycle", "sublabel": "states + transitions", "pos": [760, 290], "size": [150, 60] },
+    { "id": "local", "type": "database", "label": "sessions/", "sublabel": "registry.json + *.md", "pos": [990, 150], "size": [150, 60] },
+    { "id": "global", "type": "database", "label": "~/nxm/sessions", "sublabel": "global registry.jsonl", "pos": [990, 300], "size": [150, 60] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "The binary (owns config/env + logging)", "wraps": ["binary", "wiring", "config", "shared"] },
+    { "kind": "region", "label": "nxm-session-core (config-agnostic library)", "wraps": ["core", "handler", "handoff", "registry"] }
+  ],
+  "connections": [
+    { "id": "c-b", "from": "client", "to": "binary", "label": "JSON-RPC / stdio", "variant": "emphasis" },
+    { "id": "b-w", "from": "binary", "to": "wiring", "label": "load_config", "fromSide": "bottom", "toSide": "top" },
+    { "id": "w-cfg", "from": "wiring", "to": "config", "label": "[session]", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "w-sh", "from": "wiring", "to": "shared", "label": "logging", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "b-core", "from": "binary", "to": "core", "label": "inject SessionPaths / SessionContext", "variant": "emphasis" },
+    { "id": "core-h", "from": "core", "to": "handler" },
+    { "id": "core-ho", "from": "core", "to": "handoff" },
+    { "id": "core-r", "from": "core", "to": "registry" },
+    { "id": "h-local", "from": "handler", "to": "local", "label": "read/state" },
+    { "id": "r-local", "from": "registry", "to": "local", "label": "handoffs" },
+    { "id": "r-global", "from": "registry", "to": "global", "label": "pointers" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "The binary (thin)", "items": ["main.rs: stdio JSON-RPC loop", "wiring.rs: resolves config + env into SessionPaths / SessionContext / ResolveEnv", "owns logging via nxm-shared — never in the core"] },
+    { "dot": "emerald", "title": "The core (agnostic)", "items": ["nxm-session-core holds ALL session logic", "zero std::env in src/ — receives resolved values", "same library will back the future -ee edition"] },
+    { "dot": "amber", "title": "Dependencies", "items": ["nxm-session-core (tag v0.1.0)", "nxm-config (tag v0.1.0) — [session] block", "nxm-shared (rev 2e18023) — logging/tracing"] }
+  ]
+}

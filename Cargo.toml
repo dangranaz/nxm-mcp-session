@@ -1,0 +1,40 @@
+[package]
+name = "nxm-mcp-session"
+version = "0.5.0"
+edition = "2021"
+rust-version = "1.75"
+license = "MIT"
+description = "A small, dependency-light MCP server that rationalises a long coding session into a standard handoff document and manages a session registry."
+repository = "https://github.com/dangranaz/nxm-mcp-session"
+authors = ["Daniele Oddo"]
+keywords = ["mcp", "session", "handoff", "context", "cli"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "nxm-mcp-session"
+path = "src/main.rs"
+
+[dependencies]
+# Serialization (JSON-RPC messages)
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Error handling
+anyhow = "1"
+# TOML parsing for the pure wiring resolver (build_wiring takes toml::Value)
+toml = "0.8"
+# Session core (public nxm-session-core, tag v0.1.0): the pure
+# session logic this binary used to duplicate in-house. Never `path=`.
+nxm-session-core = { git = "https://github.com/dangranaz/nxm-session-core", tag = "v0.1.0" }
+# Product config: [session] block read via Config.extra, schema NOT extended.
+nxm-config = { git = "https://github.com/dangranaz/nxm-config", tag = "v0.1.0" }
+# Shared utilities (logging, config, errors)
+# Pinned git reference on the PUBLIC nxm-shared repo — never `path=`,
+# so the public mirror resolves it and `cargo publish` stays valid. Pinned to
+# the same rev as nxm-mcp-webtomd (includes `init_product_logging`).
+# NOTE: tag `v0.2.0` does not exist on the remote; rev 2e18023 is the v0.2.0 code
+# (identical per task-01 note), kept as pinned rev.
+nxm-shared = { git = "https://github.com/dangranaz/nxm-shared", tag = "v0.2.0" }
+
+[dev-dependencies]
+# Scratch dirs for registry/handoff tests (same version as sibling crates)
+tempfile = "3"

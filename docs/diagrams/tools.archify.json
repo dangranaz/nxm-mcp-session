@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "diagram_type": "tree",
+  "meta": {
+    "title": "nxm-mcp-session — the 14 MCP tools",
+    "subtitle": "Grouped by how they run: pure dispatch, transport-driven (Sampling/Elicitation), lifecycle, and the cross-repo global registry.",
+    "output": "tools.html",
+    "quality_profile": "showcase",
+    "locale": "en"
+  },
+  "layout": { "direction": "right" },
+  "nodes": [
+    { "id": "root", "label": "14 typed tools", "sublabel": "JSON-RPC over stdio" },
+
+    { "id": "transport", "label": "Transport-driven", "parent": "root", "sublabel": "need Sampling / Elicitation" },
+    { "id": "generate_handoff", "label": "generate_handoff", "parent": "transport", "sublabel": "distil session → handoff" },
+    { "id": "update_session", "label": "update_session", "parent": "transport", "sublabel": "upsert-per-id, bump revision" },
+    { "id": "audit_last_task", "label": "audit_last_task", "parent": "transport", "sublabel": "critical review of last task" },
+
+    { "id": "readstate", "label": "Read / state", "parent": "root", "sublabel": "pure dispatch, no transport" },
+    { "id": "list_sessions", "label": "list_sessions", "parent": "readstate", "sublabel": "live states by default" },
+    { "id": "get_session", "label": "get_session", "parent": "readstate", "sublabel": "handoff doc by id" },
+    { "id": "find_resumable_session", "label": "find_resumable_session", "parent": "readstate", "sublabel": "best unconsumed to resume" },
+    { "id": "mark_consumed", "label": "mark_consumed", "parent": "readstate", "sublabel": "flip to consumed" },
+    { "id": "create_session", "label": "create_session", "parent": "readstate", "sublabel": "mint <slug>-<NN> key" },
+    { "id": "register_prompt", "label": "register_prompt", "parent": "readstate", "sublabel": "index a delegation brief" },
+
+    { "id": "lifecycle", "label": "Lifecycle", "parent": "root", "sublabel": "state transitions + archive" },
+    { "id": "set_status", "label": "set_status", "parent": "lifecycle", "sublabel": "active/onhold/abandoned/done/superseded" },
+    { "id": "reopen", "label": "reopen", "parent": "lifecycle", "sublabel": "bring an archived session back" },
+
+    { "id": "archive", "label": "Archive", "parent": "root", "sublabel": "raw session + local archive" },
+    { "id": "archive_session", "label": "archive_session", "parent": "archive", "sublabel": "save raw .jsonl (0600)" },
+    { "id": "purge_archive", "label": "purge_archive", "parent": "archive", "sublabel": "delete the raw archive" },
+
+    { "id": "global", "label": "Global registry", "parent": "root", "sublabel": "cross-repo pointers" },
+    { "id": "list_global_sessions", "label": "list_global_sessions", "parent": "global", "sublabel": "all repos + session number" }
+  ]
+}

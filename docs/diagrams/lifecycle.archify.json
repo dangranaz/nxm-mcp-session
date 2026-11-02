@@ -1,0 +1,33 @@
+{
+  "schema_version": 3,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Session lifecycle",
+    "subtitle": "The five states a session moves through, driven by set_status and reopen.",
+    "output": "lifecycle.html",
+    "quality_profile": "showcase",
+    "locale": "en"
+  },
+  "mainPath": ["active", "done"],
+  "states": [
+    { "id": "active", "type": "start", "label": "Active", "sublabel": "created, live in the registry", "tag": "live", "step": "01" },
+    { "id": "onhold", "type": "waiting", "label": "On Hold", "sublabel": "paused in place", "tag": "live" },
+    { "id": "abandoned", "type": "neutral", "label": "Abandoned", "sublabel": "dormant, stays in place", "tag": "reopenable" },
+    { "id": "superseded", "type": "waiting", "label": "Superseded", "sublabel": "archived, replaced by a successor", "tag": "archived" },
+    { "id": "done", "type": "success", "label": "Done", "sublabel": "archived — terminal", "tag": "terminal", "step": "02" }
+  ],
+  "transitions": [
+    { "id": "active-done", "from": "active", "to": "done", "label": "set_status done", "variant": "emphasis" },
+    { "id": "active-onhold", "from": "active", "to": "onhold", "label": "set_status onhold" },
+    { "id": "onhold-active", "from": "onhold", "to": "active", "label": "reopen" },
+    { "id": "active-abandoned", "from": "active", "to": "abandoned", "label": "set_status abandoned" },
+    { "id": "abandoned-active", "from": "abandoned", "to": "active", "label": "reopen" },
+    { "id": "active-superseded", "from": "active", "to": "superseded", "label": "set_status superseded", "variant": "security" },
+    { "id": "superseded-active", "from": "superseded", "to": "active", "label": "reopen (restore files)", "variant": "emphasis" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "In place (reopenable)", "items": ["onhold and abandoned keep the handoff in the live tree", "reopen returns them to active with no file move", "the registry entry is never lost"] },
+    { "dot": "amber", "title": "Archived states", "items": ["done and superseded physically move the handoff + linked prompts under the archive root", "the entry drops from the active registry", "superseded records its successor (consumed_by)"] },
+    { "dot": "rose", "title": "Terminal vs recoverable", "items": ["done is terminal — reopen is refused; create a successor instead", "superseded can be reopened: its files are restored from the archive", "a terminal state also reconciles the global registry"] }
+  ]
+}
